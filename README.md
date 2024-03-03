@@ -1,2 +1,4 @@
-# Modern-workflows-in-data-science
-SURV675
+# SURV675: Modern Workflows in Data Science
+
+Sungjoo Cho
+
