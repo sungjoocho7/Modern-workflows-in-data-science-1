@@ -33,6 +33,7 @@ save(count_city, file = "original_count_city.csv")
 save(timeseries, file = "original_timeseries.csv")
 ```
 
+
 ## merge the two datasets and create a long version of the data. Save both long and wide data locally
 
 ```{r}
@@ -47,7 +48,7 @@ covid <- timeseries %>%
   select(-c(Province.State, Country.Region, Lat.x, Long))
 
 # longer  
-covid_longer <- covid %>%
+covid_long <- covid %>%
   pivot_longer(
     cols = !c(Combined_Key, UID, iso2, iso3, code3, FIPS, Admin2, Province_State, Country_Region, Lat.y, Long_, Population),
     names_to = "time",
@@ -55,19 +56,94 @@ covid_longer <- covid %>%
   )
 
 # remove X
-covid_longer$time <- gsub("^X", "", covid_longer$time)
+covid_long$time <- gsub("^X", "", covid_long$time)
 
+# date variable (month-day-year format)
+covid_long$date <- mdy(covid_long$time)
+
+# save locally
 save(covid, file = "covid_wide.csv")
-save(covid_longer, file = "covid_long.csv")
+save(covid_long, file = "covid_long.csv")
 ```
+
 
 ## create three graphs using ggplot and save them
 
 ### i) overall change in time of log number of cases
+```{r}
+# create log number of cases
+covid_long$logcase <- log(covid_long$case)
+covid_long$logcase <- ifelse(covid_long$logcase == -Inf, 0, covid_long$logcase)
+
+plot_overall_change <- ggplot(covid_long, aes(x = date, y = logcase)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Overall Change in Time of Log number of Cases",
+       x = "Time", 
+       y = "Log Number of Cases")
+plot_overall_change  
+
+# plot
+plot_overall_change <- ggplot(covid_long, aes(x = date, y = log(case))) +
+  geom_line(color = "skyblue") +
+  labs(title = "Overall Change in Time of Log number of Cases",
+       x = "Time", 
+       y = "Log Number of Cases")
+plot_overall_change  
+
+# save
+ggsave("plot_overall_change.png", plot = plot_overall_change)
+```
 
 ### ii) change in time of log number of cases by country
+```{r}
+# table
+tab_change_ctry <- covid_long %>%
+  group_by(Country_Region, date) %>%
+  summarise(sum_case = sum(case), .groups = "drop")
+
+# plot
+plot_change_ctry <- ggplot(tab_change_ctry, aes(x = date, 
+                                                y = log(sum_case), 
+                                                color = Country_Region)) +
+  geom_line() +
+  labs(title = "Change in Time of Log number of Cases",
+       x = "Time",
+       y = "Log Number of Cases") +
+  theme(legend.position = "none")
+plot_change_ctry
+
+# save
+ggsave("plot_overall_change.png", plot = plot_overall_change)
+```
+
 
 ### iii) change in time by country of rate of infection per 100,000 cases
+
+```{r}
+# table
+tab_change_ctry_rate_infection <- covid_long %>%
+  group_by(Country_Region, date) %>%
+  summarise(sum_case = sum(case), 
+            population = sum(Population),
+            .groups = "drop")
+
+# plot
+plot_change_ctry_rate_infection <- ggplot(tab_change_ctry_rate_infection, 
+                                aes(x = date, 
+                                    y = (sum_case/population)*100000, 
+                                    color = Country_Region)) +
+  geom_line() +
+  labs(title = "Change in Time of Rate of Infection per 100,000 Cases",
+       x = "Time",
+       y = "Rate of infection per 100,000 Cases") +
+  theme(legend.position = "none")
+plot_change_ctry_rate_infection
+
+# save
+ggsave("plot_overall_change.png", plot = plot_overall_change)
+```
+
 
 ## use the README file to write a mini-report (10%). It should include:
 
