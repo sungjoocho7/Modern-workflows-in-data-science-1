@@ -28,7 +28,7 @@ This repository is organized as follows:
 * **/data** - Contains both the raw data and edited datasets used in the analysis.
 * **/scripts** - Contains R script utilized for data processing and analysis.
 * **/figs** - Contains figures (plot, etc) generated during the analysis or any visual outputs produced.
-* **/documentation** - Contains instructional documents and a README HTML version report.
+* **/documentation** - Contains instructional documents and a README HTML version.
 
 The steps in creating the report is as follows:
 
