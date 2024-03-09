@@ -11,8 +11,8 @@ timeseries_github_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID
 timeseries <- read.csv(timeseries_github_url)
 
 # save original dataset locally
-save(count_city, file = "data/original_count_city.csv")
-save(timeseries, file = "data/original_timeseries.csv")
+save(count_city, file = "data/UID_ISO_FIPS_LookUp_Table.csv")
+save(timeseries, file = "data/time_series_covid19_confirmed_global.csv")
 
 -----------------------------------------------------------------------------
 
@@ -30,8 +30,8 @@ covid_wide <- timeseries %>%
   select(-c(Province.State, Country.Region, Lat.x, Long))
 
 # cleaning variable names
-colnames(covid)[which(colnames(covid) == "Lat.y")] <- "Lat"
-colnames(covid)[which(colnames(covid) == "Long_")] <- "Long"
+colnames(covid_wide)[which(colnames(covid_wide) == "Lat.y")] <- "Lat"
+colnames(covid_wide)[which(colnames(covid_wide) == "Long_")] <- "Long"
 
 # changing the dataset to long format  
 covid_long <- covid_wide %>%
@@ -43,7 +43,7 @@ covid_long <- covid_wide %>%
 
 # change time to month-day-year format
 covid_long$date <- gsub("^X", "", covid_long$time)
-covid_long$date <- mdy(covid_long$time)
+covid_long$date <- mdy(covid_long$date)
 
 # save both wide and long format dataset locally
 save(covid_wide, file = "data/covid_wide.csv")

@@ -28,7 +28,7 @@ count_city <- read.csv(count_city_github_url)
 timeseries_github_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv?raw=true"
 timeseries <- read.csv(timeseries_github_url)
 
-# save locally
+# save original dataset locally
 save(count_city, file = "data/UID_ISO_FIPS_LookUp_Table.csv")
 save(timeseries, file = "data/time_series_covid19_confirmed_global.csv")
 ```
@@ -42,14 +42,14 @@ timeseries$Combined_Key <- ifelse(is.na(timeseries$Province.State) | timeseries$
                                    timeseries$Country.Region,
                                    paste(timeseries$Province.State, timeseries$Country.Region, sep = ", "))
 
-# merging data (wider format)
-covid <- timeseries %>%
+# merging data (wide format)
+covid_wide <- timeseries %>%
   left_join(count_city, by = "Combined_Key") %>%
   select(-c(Province.State, Country.Region, Lat.x, Long))
 
 # cleaning variable names
-colnames(covid)[which(colnames(covid) == "Lat.y")] <- "Lat"
-colnames(covid)[which(colnames(covid) == "Long_")] <- "Long"
+colnames(covid_wide)[which(colnames(covid_wide) == "Lat.y")] <- "Lat"
+colnames(covid_wide)[which(colnames(covid_wide) == "Long_")] <- "Long"
 
 # longer  
 covid_long <- covid %>%
