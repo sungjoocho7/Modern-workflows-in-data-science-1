@@ -11,8 +11,8 @@ timeseries_github_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID
 timeseries <- read.csv(timeseries_github_url)
 
 # save original dataset locally
-save(count_city, file = "original_count_city.csv")
-save(timeseries, file = "original_timeseries.csv")
+save(count_city, file = "data/original_count_city.csv")
+save(timeseries, file = "data/original_timeseries.csv")
 
 -----------------------------------------------------------------------------
 
@@ -29,23 +29,25 @@ covid_wide <- timeseries %>%
   left_join(count_city, by = "Combined_Key") %>%
   select(-c(Province.State, Country.Region, Lat.x, Long))
 
+# cleaning variable names
+colnames(covid)[which(colnames(covid) == "Lat.y")] <- "Lat"
+colnames(covid)[which(colnames(covid) == "Long_")] <- "Long"
+
 # changing the dataset to long format  
 covid_long <- covid_wide %>%
   pivot_longer(
-    cols = !c(Combined_Key, UID, iso2, iso3, code3, FIPS, Admin2, Province_State, Country_Region, Lat.y, Long_, Population),
+    cols = !c(Combined_Key, UID, iso2, iso3, code3, FIPS, Admin2, Province_State, Country_Region, Lat, Long, Population),
     names_to = "time",
     values_to = "case"
   )
 
-# remove X from covid_long
-covid_long$time <- gsub("^X", "", covid_long$time)
-
-# add date variable (month-day-year format)
+# change time to month-day-year format
+covid_long$date <- gsub("^X", "", covid_long$time)
 covid_long$date <- mdy(covid_long$time)
 
 # save both wide and long format dataset locally
-save(covid_wide, file = "covid_wide.csv")
-save(covid_long, file = "covid_long.csv")
+save(covid_wide, file = "data/covid_wide.csv")
+save(covid_long, file = "data/covid_long.csv")
 
 
 
@@ -60,7 +62,7 @@ plot_overall_change <- ggplot(covid_long, aes(x = date, y = log(case + 1))) +
 plot_overall_change
 
 # save the plot locally
-ggsave("plot_overall_change.png", plot = plot_overall_change)
+ggsave("figs/plot_overall_change.png", plot = plot_overall_change)
 
 
 ### ii) change in time of log number of cases by country
@@ -81,7 +83,7 @@ plot_change_ctry <- ggplot(tab_change_ctry, aes(x = date,
 plot_change_ctry
 
 # save the plot locally
-ggsave("plot_change_ctry.png", plot = plot_change_ctry)
+ggsave("figs/plot_change_ctry.png", plot = plot_change_ctry)
 
 
 ### iii) change in time by country of rate of infection per 100,000 cases
@@ -107,7 +109,7 @@ plot_change_rate_inf <- ggplot(tab_change_rate_inf,
 plot_change_rate_inf
 
 # save
-ggsave("plot_change_rate_inf.png", plot = plot_change_rate_inf)
+ggsave("figs/plot_change_rate_inf.png", plot = plot_change_rate_inf)
 
 
 

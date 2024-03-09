@@ -29,8 +29,8 @@ timeseries_github_url <- "https://raw.githubusercontent.com/CSSEGISandData/COVID
 timeseries <- read.csv(timeseries_github_url)
 
 # save locally
-save(count_city, file = "UID_ISO_FIPS_LookUp_Table.csv")
-save(timeseries, file = "time_series_covid19_confirmed_global.csv")
+save(count_city, file = "data/UID_ISO_FIPS_LookUp_Table.csv")
+save(timeseries, file = "data/time_series_covid19_confirmed_global.csv")
 ```
 
 
@@ -47,23 +47,25 @@ covid <- timeseries %>%
   left_join(count_city, by = "Combined_Key") %>%
   select(-c(Province.State, Country.Region, Lat.x, Long))
 
+# cleaning variable names
+colnames(covid)[which(colnames(covid) == "Lat.y")] <- "Lat"
+colnames(covid)[which(colnames(covid) == "Long_")] <- "Long"
+
 # longer  
 covid_long <- covid %>%
   pivot_longer(
-    cols = !c(Combined_Key, UID, iso2, iso3, code3, FIPS, Admin2, Province_State, Country_Region, Lat.y, Long_, Population),
+    cols = !c(Combined_Key, UID, iso2, iso3, code3, FIPS, Admin2, Province_State, Country_Region, Lat, Long, Population),
     names_to = "time",
     values_to = "case"
   )
 
-# remove X
-covid_long$time <- gsub("^X", "", covid_long$time)
-
-# date variable (month-day-year format)
-covid_long$date <- mdy(covid_long$time)
+# change time to month-day-year format
+covid_long$date <- gsub("^X", "", covid_long$time)
+covid_long$date <- mdy(covid_long$date)
 
 # save locally
-save(covid, file = "covid_wide.csv")
-save(covid_long, file = "covid_long.csv")
+save(covid, file = "data/covid_wide.csv")
+save(covid_long, file = "data/covid_long.csv")
 ```
 
 
@@ -80,7 +82,7 @@ plot_overall_change <- ggplot(covid_long, aes(x = date, y = log(case + 1))) +
 plot_overall_change  
 
 # save
-ggsave("plot_overall_change.png", plot = plot_overall_change)
+ggsave("figs/plot_overall_change.png", plot = plot_overall_change)
 ```
 
 ### ii) change in time of log number of cases by country
@@ -102,7 +104,7 @@ plot_change_ctry <- ggplot(tab_change_ctry, aes(x = date,
 plot_change_ctry
 
 # save
-ggsave("plot_change_ctry.png", plot = plot_change_ctry)
+ggsave("figs/plot_change_ctry.png", plot = plot_change_ctry)
 ```
 
 
@@ -130,7 +132,7 @@ plot_change_rate_inf <- ggplot(tab_change_rate_inf,
 plot_change_rate_inf
 
 # save
-ggsave("plot_change_rate_inf.png", plot = plot_change_rate_inf)
+ggsave("figs/plot_change_rate_inf.png", plot = plot_change_rate_inf)
 ```
 
 
