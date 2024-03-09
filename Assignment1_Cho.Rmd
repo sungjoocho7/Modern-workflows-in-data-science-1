@@ -71,20 +71,8 @@ save(covid_long, file = "covid_long.csv")
 
 ### i) overall change in time of log number of cases
 ```{r}
-# create log number of cases
-covid_long$logcase <- log(covid_long$case)
-covid_long$logcase <- ifelse(covid_long$logcase == -Inf, 0, covid_long$logcase)
-
-plot_overall_change <- ggplot(covid_long, aes(x = date, y = logcase)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Overall Change in Time of Log number of Cases",
-       x = "Time", 
-       y = "Log Number of Cases")
-plot_overall_change  
-
 # plot
-plot_overall_change <- ggplot(covid_long, aes(x = date, y = log(case))) +
+plot_overall_change <- ggplot(covid_long, aes(x = date, y = log(case + 1))) +
   geom_line(color = "skyblue") +
   labs(title = "Overall Change in Time of Log number of Cases",
        x = "Time", 
@@ -114,7 +102,7 @@ plot_change_ctry <- ggplot(tab_change_ctry, aes(x = date,
 plot_change_ctry
 
 # save
-ggsave("plot_overall_change.png", plot = plot_overall_change)
+ggsave("plot_change_ctry.png", plot = plot_change_ctry)
 ```
 
 
@@ -122,26 +110,27 @@ ggsave("plot_overall_change.png", plot = plot_overall_change)
 
 ```{r}
 # table
-tab_change_ctry_rate_infection <- covid_long %>%
+tab_change_rate_inf <- covid_long %>%
   group_by(Country_Region, date) %>%
   summarise(sum_case = sum(case), 
             population = sum(Population),
             .groups = "drop")
+tab_change_rate_inf$rate_inf <- (tab_change_rate_inf$sum_case/tab_change_rate_inf$population) * 100000
 
 # plot
-plot_change_ctry_rate_infection <- ggplot(tab_change_ctry_rate_infection, 
+plot_change_rate_inf <- ggplot(tab_change_rate_inf, 
                                 aes(x = date, 
-                                    y = (sum_case/population)*100000, 
+                                    y = rate_inf, 
                                     color = Country_Region)) +
   geom_line() +
   labs(title = "Change in Time of Rate of Infection per 100,000 Cases",
        x = "Time",
        y = "Rate of infection per 100,000 Cases") +
   theme(legend.position = "none")
-plot_change_ctry_rate_infection
+plot_change_rate_inf
 
 # save
-ggsave("plot_overall_change.png", plot = plot_overall_change)
+ggsave("plot_change_rate_inf.png", plot = plot_change_rate_inf)
 ```
 
 
